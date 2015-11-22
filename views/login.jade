@@ -1,0 +1,9 @@
+extends layout
+
+block content
+  h1= title
+  br
+  form(role='form', action="/login",method="post", name="login")
+    input(type='text', name="username", placeholder='Enter Username')
+    input(type='password', name="password", placeholder='Enter Password')
+    button(type='submit') Submit
