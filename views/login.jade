@@ -1,6 +1,9 @@
 extends layout
 
 block content
+  if messages
+    .messages.alert
+      span= messages
   h1= title
   br
   form(role='form', action="/login",method="post", name="login")

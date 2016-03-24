@@ -5,7 +5,7 @@ var router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Node Login System', user: req.user });
+  res.render('index', { title: 'Node Login System', user: req.user, messages: req.flash("info") });
 });
 
 router.get('/userlist', function(req, res) {
@@ -33,11 +33,23 @@ router.post('/register', function(req, res) {
 });
 
  router.get('/login', function(req, res) {
-      res.render('login', { user : req.user });
+      res.render('login', { user : req.user, title: 'Login', messages: req.flash("alert") });
   });
 
-  router.post('/login', passport.authenticate('local'), function(req, res) {
-      res.redirect('/');
+  router.post('/login', passport.authenticate('local', {
+      successRedirect: '/loginSuccess',
+      failureRedirect: '/loginFailure'
+    })
+  );
+
+  router.get('/loginFailure', function(req, res, next) {
+    req.flash('alert', 'Failed to login');
+    res.redirect('/login');
+  });
+
+  router.get('/loginSuccess', function(req, res, next) {
+    req.flash('info', 'Login Success!');
+    res.redirect('/');
   });
 
   router.get('/logout', function(req, res) {
@@ -50,6 +62,13 @@ router.post('/register', function(req, res) {
   });
 
 router.get('/users/:username', function(req, res) {
+  Account.findOne({ 'username': req.params.username }, 'username regTime' , function(err, user) {
+    if (err) return handleError(err);
+    res.render('user', { "user" : user });
+  });
+});
+
+router.get('/users/:username/edit', function(req, res) {
   Account.findOne({ 'username': req.params.username }, 'username regTime' , function(err, user) {
     if (err) return handleError(err);
     res.render('user', { "user" : user });

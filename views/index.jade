@@ -1,6 +1,9 @@
 extends layout
 
 block content
+  if messages
+    .messages.info
+      span= messages
   h1= title
   p Welcome to #{title}
   if(!user)
