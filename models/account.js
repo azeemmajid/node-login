@@ -3,9 +3,11 @@ var mongoose = require('mongoose'),
     passportLocalMongoose = require('passport-local-mongoose');
 
 var Account = new Schema({
-    username: String,
-    email: String,
-    password: String,
+    username: { type: String },
+    email: { type: String },
+    password: { type: String },
+    verified: { type: Boolean, default: false},
+    admin: { type: Boolean, default: false },
     regTime: { type: Date, default: Date.now }
 });
 

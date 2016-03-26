@@ -17,20 +17,26 @@ router.get('/userlist', function(req, res) {
 });
 
 router.get('/register', function(req,res) {
-  res.render('register', { title: 'Register Here'});
+  res.render('register', { title: 'Register Here', messages: req.flash("alert") });
 });
 
 router.post('/register', function(req, res) {
-   Account.register(new Account({ username : req.body.username, email: req.body.email }), req.body.password, function(err, account) {
-        if (err) {
-            return res.render('register', { account : account });
-        }
-
-        passport.authenticate('local')(req, res, function () {
-          res.redirect('/');
-        });
+  if(req.body.password == req.body.password2 && req.body.username && req.body.email && req.body.password) {
+  Account.register(new Account({ username : req.body.username, email: req.body.email }), req.body.password, function(err, account) {
+    if (err) {
+      return res.render('register', { account : account, title: 'Register Here' });
+    }
+    passport.authenticate('local')(req, res, function () {
+      req.flash('info', 'Registered!');
+      res.redirect('/');
+      });
     });
+  } else {
+    req.flash('alert', "Something went wrong, make sure all fields are complete and your passwords match");
+    res.redirect('/register');
+  }
 });
+  
 
  router.get('/login', function(req, res) {
       res.render('login', { user : req.user, title: 'Login', messages: req.flash("alert") });
@@ -68,11 +74,12 @@ router.get('/users/:username', function(req, res) {
   });
 });
 
-router.get('/users/:username/edit', function(req, res) {
-  Account.findOne({ 'username': req.params.username }, 'username regTime' , function(err, user) {
-    if (err) return handleError(err);
-    res.render('user', { "user" : user });
-  });
+router.get('/user/edit', function(req, res) {
+  res.render('useredit', {"user": req.user});
+});
+
+router.get('/forgot', function(req, res) {
+  res.render('forgot', { user: req.user });
 });
 
 module.exports = router;

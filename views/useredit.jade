@@ -1,0 +1,11 @@
+extends layout
+
+block content
+  if user
+    h1= user.username
+  else
+    h1 Login Or Register
+    a(href="/login") Login
+    br
+    a(href="/register") Register
+  

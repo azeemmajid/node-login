@@ -1,0 +1,13 @@
+extends layout
+
+block content
+	if messages
+		.messages.alert
+			span= messages
+	h1 Forgot Password
+	form(method='POST')
+		p
+			b Email
+		input(type='text', name='email', placeholder='email')
+		br
+		button(type='submit') Send Reset

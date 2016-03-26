@@ -7,6 +7,15 @@ block content
   h1= title
   br
   form(role='form', action="/login",method="post", name="login")
+    p
+        b Username
     input(type='text', name="username", placeholder='Enter Username')
+    br
+    p
+        b Password
     input(type='password', name="password", placeholder='Enter Password')
+    br
+    br
     button(type='submit') Submit
+    br
+    a(href='/forgot') Forgotten Password
