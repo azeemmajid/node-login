@@ -87,8 +87,11 @@ router.post('/user/editemail', function(req, res) {
     Account.findOneAndUpdate({'username': req.user.username}, { 'email': req.body.email}, function(err, user) {
       if(err) return handleError(err);
 
-      res.send("Email has been updated");
+      req.flash('alert', "The information has been changed");
+      res.redirect('/user/edit');
     });
+  } else {
+    res.redirect('/user/edit');
   }
 });
 
@@ -98,7 +101,7 @@ router.post('/user/editpass', function(req, res) {
       if(sanitizedUser) {
         sanitizedUser.setPassword(req.body.newpass, function() {
           sanitizedUser.save();
-          req.flash('alert,')
+          req.flash('alert', "Password has been changed");
           return res.redirect('/user/edit');
         });
       } else {
