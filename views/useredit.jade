@@ -1,8 +1,34 @@
 extends layout
 
 block content
+  if messages
+    .messages.alert
+      span= messages
+
   if user
-    h1= user.username
+    h1 Edit Information
+    h3 Edit Email
+    form(method="POST", action="/user/editemail")
+      p
+        b Email
+      input#inputEmail(type="text", name="email", value=user.email)
+      br
+      button#btnSubmit(type="submit") Submit
+    br
+    br
+    h3 Edit Password
+    form(method="POST", action="/user/editpass")
+      p
+        b Current Password
+      input#inputCurrPass(type="password", name="currentpass")
+      p
+        b New Password
+      input#inputNewPass(type="password", name="newpass")
+      p
+        b New Password Again
+      input#inputNewPass2(type="password" name="newpass2")
+      br
+      button#btnSubmit(type="submit") Submit
   else
     h1 Login Or Register
     a(href="/login") Login

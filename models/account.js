@@ -11,6 +11,6 @@ var Account = new Schema({
     regTime: { type: Date, default: Date.now }
 });
 
-Account.plugin(passportLocalMongoose);
+Account.plugin(passportLocalMongoose, { usernameUnique: true });
 
 module.exports = mongoose.model('user', Account, 'users');

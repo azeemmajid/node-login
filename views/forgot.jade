@@ -5,7 +5,7 @@ block content
 		.messages.alert
 			span= messages
 	h1 Forgot Password
-	form(method='POST')
+	form(method='POST', action="/forgot")
 		p
 			b Email
 		input(type='text', name='email', placeholder='email')
