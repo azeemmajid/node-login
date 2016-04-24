@@ -3,9 +3,17 @@ var Account = require("../models/account.js");
 var express = require('express');
 var crypto = require('crypto');
 var async = require('async');
+var nodemailer = require('nodemailer');
+var mg = require('nodemailer-mailgun-transport')
 var router = express.Router();
 
 /* GET home page. */
+var auth = {
+  auth: {
+    //auth with mailgun
+  }
+}
+var smtpTransport = nodemailer.createTransport(mg(auth));
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Node Login System', user: req.user, messages: req.flash("info") });
 });
@@ -30,7 +38,35 @@ router.post('/register', function(req, res) {
       return res.redirect('/register');
     }
     passport.authenticate('local')(req, res, function () {
-      req.flash('info', 'Registered!');
+      async.waterfall([
+        function(needed) {
+          crypto.randomBytes(20, function(err, buf) {
+            var token = buf.toString('hex');
+            account.verifyToken = token;
+            account.save(function(err) {
+              if(err) console.log(err);
+            });
+            needed(err, token);
+          });
+        },
+        function(token, needed) {
+          var mailOptions = {
+            from: 'test@example.com', //sender address
+            to: req.body.email,
+            subject: 'Welcome',
+            text: 'You have register. Please go to http://' + req.headers.host + '/verify/' + token + ' to verify your account'
+          };
+          smtpTransport.sendMail(mailOptions, function(err, info) {
+            if(err) {
+              cosnole.log('Error: ' + err);
+           } else {
+              console.log('Response" ' + info);
+              req.flash('info', 'An e-mail has been sent to ' + req.body.email + ' with further instructions \n');
+            }
+          });
+        }
+        ]); 
+      req.flash('info', 'Registered! please check your email');
       res.redirect('/');
       });
     });
@@ -40,17 +76,30 @@ router.post('/register', function(req, res) {
   }
 });
   
+router.get('/verify/:token', function(req, res, next) {
+  Account.findOne({ verifyToken: req.params.token }, 'username verified verifyToken', function(err, user) {
+    if (err) return handleError(err);
 
- router.get('/login', function(req, res) {
-      res.render('login', { user : req.user, title: 'Login', messages: req.flash("error") });
+    user.verified = true;
+    user.verifyToken = undefined;
+    user.save(function(err) {
+      if(err) console.log(err);
+    });
+    req.flash('info', 'Your account is now verified');
+    res.redirect('/');
   });
+});
 
-  router.post('/login', passport.authenticate('local', {
-      successRedirect: '/loginSuccess',
-      failureRedirect: '/loginFailure',
-      failureFlash: true
-    })
-  );
+router.get('/login', function(req, res) {
+  res.render('login', { user : req.user, title: 'Login', messages: req.flash("error") });
+});
+
+router.post('/login', passport.authenticate('local', {
+  successRedirect: '/loginSuccess',
+  failureRedirect: '/loginFailure',
+  failureFlash: true
+  })
+);
 
   router.get('/loginFailure', function(req, res, next) {
     //req.flash('error', 'Failed to login');
@@ -114,7 +163,7 @@ router.post('/user/editpass', function(req, res) {
 });
 
 router.get('/forgot', function(req, res) {
-  res.render('forgot', { user: req.user, messages: req.flash("error") });
+  res.render('forgot', { user: req.user, messages: req.flash("info") });
 });
 
 //STILL NEEDS TO BE FINISHED
@@ -141,14 +190,68 @@ router.post('/forgot', function(req, res) {
         user.resetPasswordExpires = Date.now() + 10800000; //3 hours
 
         user.save(function(err) {
+          if(err) console.log(err);
           needed(err, token, user);
         });
       });
     },
     function(token, user, needed) {
       //email user with token
+      var mailOptions = {
+        from: 'test@example.com', //sender address
+        to: user.email,
+        subject: 'Reset email',
+        text: 'this is a test. go to http://' + req.headers.host + '/reset/' + token + '\n\n'
+      };
+      smtpTransport.sendMail(mailOptions, function(err, info) {
+        if(err) {
+          cosnole.log('Error: ' + err);
+        } else {
+          console.log('Response" ' + info);
+          req.flash('info', 'An e-mail has been sent to ' + user.email + ' with further instructions \n');
+          needed(err, 'done');
+        }
+      });
     }
-  ]);
+  ], function(err) {
+    if (err) return next(err);
+    res.redirect('/forgot');
+  });
+});
+
+router.get('/reset/:token', function(req, res) {
+  Account.findOne({ resetPasswordToken: req.params.token}, function(err, user) {
+    if(!user) {
+      req.flash('info', 'Password reset token is invalid or has expired.');
+      return res.redirect('/forgot');
+    }
+    res.render('reset', { user: req.user });
+  });
+});
+
+router.post('/reset/:token', function(req, res) {
+  async.waterfall([
+    function(needed) {
+      Account.findOne({ resetPasswordToken: req.params.token }, function(err, user) {
+        if(!user) {
+          req.flash('info', 'Password reset token is invalid or has expired');
+          return res.redirect('back');
+        }
+
+        user.password = req.body.password;
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+
+        user.save(function(err) {
+          req.logIn(user, function(err) {
+            needed(err, user);
+          });
+        });
+      });
+    }
+  ], function(err) {
+    res.redirect('/');
+  });
 });
 
 module.exports = router;

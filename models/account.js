@@ -7,9 +7,12 @@ var Account = new Schema({
     email: { type: String },
     password: { type: String },
     verified: { type: Boolean, default: false},
+    verifyToken: String,
     admin: { type: Boolean, default: false },
+    resetPasswordToken: String,
+    resetPasswordExpires: Date,
     regTime: { type: Date, default: Date.now }
-});
+}, { strict: false });
 
 Account.plugin(passportLocalMongoose, { usernameUnique: true });
 

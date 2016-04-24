@@ -1,0 +1,17 @@
+extends layout
+
+block content
+	if messages
+		.messages.info
+			span= messages
+	h1 Reset Password
+	form(method='POST')
+		p
+			b New Password
+		input(type='password', name='password', placeholder='New Password')
+		br
+		p
+			b Confirm Password
+		input(type='password', name='confirm', placeholder='Confirm password')
+		br
+		button(type='submit') Update Password
