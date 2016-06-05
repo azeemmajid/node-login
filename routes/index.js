@@ -7,15 +7,18 @@ var nodemailer = require('nodemailer');
 var mg = require('nodemailer-mailgun-transport')
 var router = express.Router();
 
-/* GET home page. */
+//Basic setup for email service
 var auth = {
   auth: {
-    //auth with mailgun
+    api_key: 'hidden',
+    domain: 'hidden'
   }
 }
 var smtpTransport = nodemailer.createTransport(mg(auth));
+
+/* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Node Login System', user: req.user, messages: req.flash("info") });
+  res.render('index', { title: 'Node Login System', user: req.user, messages: req.flash("alert") });
 });
 
 router.get('/userlist', function(req, res) {
@@ -51,7 +54,7 @@ router.post('/register', function(req, res) {
         },
         function(token, needed) {
           var mailOptions = {
-            from: 'test@example.com', //sender address
+            from: 'hidden', //sender address
             to: req.body.email,
             subject: 'Welcome',
             text: 'You have register. Please go to http://' + req.headers.host + '/verify/' + token + ' to verify your account'
@@ -61,12 +64,12 @@ router.post('/register', function(req, res) {
               cosnole.log('Error: ' + err);
            } else {
               console.log('Response" ' + info);
-              req.flash('info', 'An e-mail has been sent to ' + req.body.email + ' with further instructions \n');
+              req.flash('alert', 'An e-mail has been sent to ' + req.body.email + ' with further instructions \n');
             }
           });
         }
         ]); 
-      req.flash('info', 'Registered! please check your email');
+      req.flash('alert', 'Registered! please check your email');
       res.redirect('/');
       });
     });
@@ -85,7 +88,7 @@ router.get('/verify/:token', function(req, res, next) {
     user.save(function(err) {
       if(err) console.log(err);
     });
-    req.flash('info', 'Your account is now verified');
+    req.flash('alert', 'Your account is now verified');
     res.redirect('/');
   });
 });
@@ -107,7 +110,7 @@ router.post('/login', passport.authenticate('local', {
   });
 
   router.get('/loginSuccess', function(req, res, next) {
-    req.flash('info', 'Login Success!');
+    req.flash('alert', 'Login Success!');
     res.redirect('/');
   });
 
@@ -136,7 +139,7 @@ router.post('/user/editemail', function(req, res) {
     Account.findOneAndUpdate({'username': req.user.username}, { 'email': req.body.email}, function(err, user) {
       if(err) return handleError(err);
 
-      req.flash('alert', "The information has been changed");
+      req.flash('alert', "The alertrmation has been changed");
       res.redirect('/user/edit');
     });
   } else {
@@ -163,7 +166,7 @@ router.post('/user/editpass', function(req, res) {
 });
 
 router.get('/forgot', function(req, res) {
-  res.render('forgot', { user: req.user, messages: req.flash("info") });
+  res.render('forgot', { user: req.user, messages: req.flash("alert") });
 });
 
 //STILL NEEDS TO BE FINISHED
@@ -198,7 +201,7 @@ router.post('/forgot', function(req, res) {
     function(token, user, needed) {
       //email user with token
       var mailOptions = {
-        from: 'test@example.com', //sender address
+        from: 'hidden', //sender address
         to: user.email,
         subject: 'Reset email',
         text: 'this is a test. go to http://' + req.headers.host + '/reset/' + token + '\n\n'
@@ -208,7 +211,7 @@ router.post('/forgot', function(req, res) {
           cosnole.log('Error: ' + err);
         } else {
           console.log('Response" ' + info);
-          req.flash('info', 'An e-mail has been sent to ' + user.email + ' with further instructions \n');
+          req.flash('alert', 'An e-mail has been sent to ' + user.email + ' with further instructions \n');
           needed(err, 'done');
         }
       });
@@ -221,8 +224,17 @@ router.post('/forgot', function(req, res) {
 
 router.get('/reset/:token', function(req, res) {
   Account.findOne({ resetPasswordToken: req.params.token}, function(err, user) {
-    if(!user) {
-      req.flash('info', 'Password reset token is invalid or has expired.');
+    if(!user || Date.now() > user.resetPasswordExpires) {
+      req.flash('alert', 'Password reset token is invalid or has expired.');
+      if(Date.now() > user.resetPasswordExpires) {
+
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+        
+        user.save(function(err) {
+          if(err) console.log(err);
+        });
+      }
       return res.redirect('/forgot');
     }
     res.render('reset', { user: req.user });
@@ -230,27 +242,24 @@ router.get('/reset/:token', function(req, res) {
 });
 
 router.post('/reset/:token', function(req, res) {
-  async.waterfall([
-    function(needed) {
-      Account.findOne({ resetPasswordToken: req.params.token }, function(err, user) {
-        if(!user) {
-          req.flash('info', 'Password reset token is invalid or has expired');
-          return res.redirect('back');
-        }
+  Account.findOne({ resetPasswordToken: req.params.token }, function(err, user) {
+    if(!user || Date.now() > user.resetPasswordExpires) {
+      req.flash('alert', 'Password reset token is invalid or has expired');
+      return res.redirect('back');
+    }
 
-        user.password = req.body.password;
+    if(user) {
+      user.setPassword(req.body.password, function() {
         user.resetPasswordToken = undefined;
         user.resetPasswordExpires = undefined;
-
-        user.save(function(err) {
-          req.logIn(user, function(err) {
-            needed(err, user);
-          });
-        });
+        user.save();
+        req.flash('alert', "Password has been changed");
+        return res.redirect('/');
       });
+    } else {
+      res.status(200).json({status: 0, msg: 'Password could not be changed'});
     }
-  ], function(err) {
-    res.redirect('/');
+
   });
 });
 
