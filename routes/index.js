@@ -169,8 +169,6 @@ router.get('/forgot', function(req, res) {
   res.render('forgot', { user: req.user, messages: req.flash("alert") });
 });
 
-//STILL NEEDS TO BE FINISHED
-//-----------------------------------------------
 router.post('/forgot', function(req, res) {
   async.waterfall([
     function(needed) {

@@ -2,7 +2,16 @@ doctype html
 html
   head
     title= title
+    link(rel='stylesheet', href='/stylesheets/normalize.css')
+    link(rel='stylesheet', href='/stylesheets/skeleton.css')
     link(rel='stylesheet', href='/stylesheets/style.css')
   body
-    block content
+    div.navbar
+      ul#nav
+        li 1
+        li 2
+        li 3
+    div.container
+      block content
+    
     //script(src='/javascript/main.js')

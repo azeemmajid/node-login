@@ -2,14 +2,15 @@
 ### A login system based in Node.js
 #### Configuration/Installation Instructions
 1. Install MongoDB
-2. Run "npm install"
-4. create a data folder
-3. Start up the MongoDB server with
-```
-mongod --dbpath 'path to data folder'
-```
-4. Change the database in app.js on line 72 (optional)
-5. Start node ``` node app.js ```
-6. Go to <http://localhost:1337/register>
-7. Register the first user to create the database
-8. <b>Extra</b>: Go to: <http://localhost:1337/userlist> to see the user
+2. Run ```npm install```
+3. Create a data folder
+4. Modify nodemailer setup in routes/index.js (By default, there is a package for mailgun)
+  * api key: line 13
+  * domain: line 14
+  * from email: line 57, line 204
+5. Start up the MongoDB server with ```mongod --dbpath 'path to data folder'```
+6. Change the database in app.js on line 72 (optional)
+7. Start node ``` node app.js ```
+8. Go to <http://localhost:1337/register>
+9. Register the first user to create the database
+  * <b>Extra</b>: Go to: <http://localhost:1337/userlist> to see the user
