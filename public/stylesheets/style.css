@@ -1,12 +1,48 @@
 body {
-  /*padding: 50px;*/
+    font-family: Roboto, Arial, sans-serif;
 }
 
-#nav {
+.container {
+    margin: 0 10%;
+}
+
+.navbar {
+    border-bottom: 1px solid #eee;
+    margin-bottom: 0.5em;
+}
+
+.navbar ul {
     list-style-type: none;
     margin: 0;
     padding: 0;
+    position: relative;
+}
 
+.navbar ul ul {
+    display: none;
+    position: absolute;
+    top: 35px;
+}
+
+.navbar ul li:hover > ul {
+    display: inherit;
+}
+
+.navbar ul ul li {
+    width: 90px;
+}
+
+#nav a {
+    text-decoration: none;
+    color: #464545;
+}
+
+#nav a:hover {
+    color: #989898;
+}
+
+.navtitle {
+    font-weight: bold;
 }
 
 li {
@@ -15,5 +51,17 @@ li {
 }
 
 a {
-  color: #00B7FF;
+    color: #00B7FF;
+}
+
+.navbar {
+    padding: 1em 2% 1em 2%;
+}
+
+#login {
+    padding-top: 0px;
+}
+
+#inputEmail {
+    margin: 0px;
 }

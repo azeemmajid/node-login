@@ -2,16 +2,30 @@ doctype html
 html
   head
     title= title
+    //Font
+    link(href='https://fonts.googleapis.com/css?family=Roboto:400,300,500,700' rel='stylesheet')
+    //Stylesheets
     link(rel='stylesheet', href='/stylesheets/normalize.css')
     link(rel='stylesheet', href='/stylesheets/skeleton.css')
     link(rel='stylesheet', href='/stylesheets/style.css')
   body
     div.navbar
       ul#nav
-        li 1
-        li 2
-        li 3
+        li.navtitle NODE-LOGIN
+        li
+          a(href="/") Home
+        li
+          a(href="/userlist") Userlist
+        li.u-pull-right#login
+          if(!currUser)
+            a(href="/login") Login
+          else if(currUser)
+            a(href="/user") Hi, #{currUser.username}
+            ul.dropdown.u-pull-right
+              li
+                a(href="/logout") Logout
+            
     div.container
       block content
-    
+      
     //script(src='/javascript/main.js')

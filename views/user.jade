@@ -1,5 +1,9 @@
 extends layout
 
 block content
-  h1= user.username
-  p Registered on: #{user.regTime}
+  h1 Hi, #{currUser.username}
+  p Registered on: #{currUser.regTime}
+  p
+    a(href='/user/edit') Edit details
+    br
+    a(href='/logout') Logout

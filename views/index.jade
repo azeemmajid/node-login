@@ -6,10 +6,10 @@ block content
       span= messages
   h1= title
   p Welcome to #{title}
-  if(!user)
+  if(!currUser)
     a(href="/login") Login
     br
     a(href="/register") Register
-  if(user)
-    p You are currently logged in as #{user.username}
+  if(currUser)
+    p You are currently logged in as #{currUser.username}
     a(href="/logout") Logout

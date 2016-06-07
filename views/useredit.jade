@@ -11,7 +11,9 @@ block content
     form(method="POST", action="/user/editemail")
       p
         b Email
-      input#inputEmail(type="text", name="email", value=user.email)
+      input#inputEmail.three.columns(type="text", name="email", value=user.email)
+      br
+      br
       br
       button#btnSubmit(type="submit") Submit
     br

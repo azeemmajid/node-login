@@ -16,9 +16,14 @@ var auth = {
 }
 var smtpTransport = nodemailer.createTransport(mg(auth));
 
+router.all('*', function(req, res,next) {
+    res.locals.currUser = req.user;
+    next();
+});
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Node Login System', user: req.user, messages: req.flash("alert") });
+  res.render('index', { title: 'Node Login System', currUser: req.user, messages: req.flash("alert") });
 });
 
 router.get('/userlist', function(req, res) {
@@ -122,6 +127,14 @@ router.post('/login', passport.authenticate('local', {
   router.get('/ping', function(req, res){
       res.send("pong!", 200);
   });
+
+router.get('/user', function(req,res) {
+    if(req.user) {
+	res.render('user');
+    } else {
+	res.redirect('/login');
+    }
+});
 
 router.get('/users/:username', function(req, res) {
   Account.findOne({ 'username': req.params.username }, 'username regTime' , function(err, user) {
