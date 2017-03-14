@@ -14,7 +14,6 @@
     "debug": "*",
     "express": "*",
     "express-session": "*",
-    "jade": "*",
     "mongodb": "*",
     "mongoose": "*",
     "morgan": "^1.7.0",
@@ -23,6 +22,7 @@
     "passport": "*",
     "passport-local": "*",
     "passport-local-mongoose": "^4.0.0",
+    "pug": "^2.0.0-beta11",
     "serve-favicon": "*"
   }
 }
