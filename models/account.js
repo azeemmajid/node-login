@@ -8,6 +8,7 @@ var Account = new Schema({
     password: { type: String },
     verified: { type: Boolean, default: false},
     verifyToken: String,
+	userStatus: String,
     admin: { type: Boolean, default: false },
     resetPasswordToken: String,
     resetPasswordExpires: Date,

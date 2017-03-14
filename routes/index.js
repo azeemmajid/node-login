@@ -6,12 +6,13 @@ var async = require('async');
 var nodemailer = require('nodemailer');
 var mg = require('nodemailer-mailgun-transport')
 var router = express.Router();
+var authFile = require('../auth.json');
 
 //Basic setup for email service
 var auth = {
   auth: {
-    api_key: 'hidden',
-    domain: 'hidden'
+    api_key: authFile.api_key,
+    domain: authFile.domain
   }
 }
 var smtpTransport = nodemailer.createTransport(mg(auth));
@@ -51,6 +52,7 @@ router.post('/register', function(req, res) {
           crypto.randomBytes(20, function(err, buf) {
             var token = buf.toString('hex');
             account.verifyToken = token;
+			account.userStatus = "Unverified";
             account.save(function(err) {
               if(err) console.log(err);
             });
@@ -59,7 +61,7 @@ router.post('/register', function(req, res) {
         },
         function(token, needed) {
           var mailOptions = {
-            from: 'hidden', //sender address
+            from: authFile.sender, //sender address
             to: req.body.email,
             subject: 'Welcome',
             text: 'You have register. Please go to http://' + req.headers.host + '/verify/' + token + ' to verify your account'
@@ -89,6 +91,7 @@ router.get('/verify/:token', function(req, res, next) {
     if (err) return handleError(err);
 
     user.verified = true;
+	user.userStatus = "Verified";
     user.verifyToken = undefined;
     user.save(function(err) {
       if(err) console.log(err);
@@ -137,7 +140,7 @@ router.get('/user', function(req,res) {
 });
 
 router.get('/users/:username', function(req, res) {
-  Account.findOne({ 'username': req.params.username }, 'username regTime' , function(err, user) {
+  Account.findOne({ 'username': req.params.username }, 'username regTime userStatus' , function(err, user) {
     if (err) return handleError(err);
     res.render('user', { "user" : user });
   });
@@ -212,7 +215,7 @@ router.post('/forgot', function(req, res) {
     function(token, user, needed) {
       //email user with token
       var mailOptions = {
-        from: 'hidden', //sender address
+        from: authFile.sender, //sender address
         to: user.email,
         subject: 'Reset email',
         text: 'this is a test. go to http://' + req.headers.host + '/reset/' + token + '\n\n'

@@ -3,6 +3,7 @@ extends layout
 block content
   h1 Hi, #{currUser.username}
   p Registered on: #{currUser.regTime}
+  p Status: #{currUser.userStatus}
   p
     a(href='/user/edit') Edit details
     br
